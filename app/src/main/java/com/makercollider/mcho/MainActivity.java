@@ -27,6 +27,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity implements ISpeechRecognitionServerEvents{
     Synthesizer syn_;
     MicrophoneRecognitionClient sst_client_ = null;
@@ -129,6 +132,9 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                 String type = json_response.getJSONArray("intents").getJSONObject(0).getString("intent");
                 JSONArray entities = json_response.getJSONArray("entities");
 
+                String value;
+                Calendar date = Calendar.getInstance();
+
                 Log.d("Mcho", "Intent Type: " + type);
                 switch (type) {
                     case "builtin.intent.weather.check_weather":
@@ -155,7 +161,62 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                                 "，温度"+ weather_api.temperature + "摄氏度" +
                                 "，" + weather_api.wind_power + "级" + weather_api.wind_dir);
                         break;
-                    case "GetTime":
+                    case "builtin.intent.calendar.check_availability":
+                        if(entities.length() > 0) {
+                            for (int entity_index = 0; entity_index < entities.length(); entity_index++) {
+                                switch (entities.getJSONObject(entity_index).getString("type")) {
+                                    case "builtin.calendar.start_time":
+                                        value = entities.getJSONObject(entity_index).getJSONObject("resolution").getString("time");
+                                        date.set(Calendar.HOUR_OF_DAY, Integer.parseInt(value.substring(1)));
+                                        break;
+                                    case "builtin.calendar.start_date":
+                                        value = entities.getJSONObject(entity_index).getJSONObject("resolution").getString("date");
+                                        date.set(Calendar.YEAR, Integer.parseInt(value.substring(0, 4)));
+                                        date.set(Calendar.MONTH, Integer.parseInt(value.substring(5, 7))-1);
+                                        date.set(Calendar.DAY_OF_MONTH, Integer.parseInt(value.substring(8, 10)));
+                                        break;
+                                    default:
+                                }
+                            }
+                        }
+                        syn_.SpeakToAudio((date.get(Calendar.MONTH)+1) + "月，" +
+                                date.get(Calendar.DAY_OF_MONTH) + "日，" +
+                                date.get(Calendar.HOUR) + "点，" +
+                                "没有待办事情。");
+
+                        Log.d("Mcho", "CheckDate: " + date.toString());
+                        break;
+                    case "builtin.intent.reminder.create_single_reminder":
+                        String reminder_text = "";
+
+                        if(entities.length() > 0) {
+                            for (int entity_index = 0; entity_index < entities.length(); entity_index++) {
+                                switch (entities.getJSONObject(entity_index).getString("type")) {
+                                    case "builtin.reminder.start_time":
+                                        value = entities.getJSONObject(entity_index).getJSONObject("resolution").getString("time");
+                                        date.set(Calendar.HOUR_OF_DAY, Integer.parseInt(value.substring(1)));
+                                        break;
+                                    case "builtin.reminder.start_date":
+                                        value = entities.getJSONObject(entity_index).getJSONObject("resolution").getString("date");
+                                        date.set(Calendar.YEAR, Integer.parseInt(value.substring(0, 4)));
+                                        date.set(Calendar.MONTH, Integer.parseInt(value.substring(5, 7))-1);
+                                        date.set(Calendar.DAY_OF_MONTH, Integer.parseInt(value.substring(8, 10)));
+                                        break;
+                                    case "builtin.reminder.reminder_text":
+                                        reminder_text = entities.getJSONObject(entity_index).getString("entity");
+                                        break;
+                                    default:
+                                }
+                            }
+                        }
+
+                        syn_.SpeakToAudio("好的，已为您建立事件。" +
+                                (date.get(Calendar.MONTH)+1) + "月，" +
+                                date.get(Calendar.DAY_OF_MONTH) + "日，" +
+                                date.get(Calendar.HOUR) + "点，" +
+                                reminder_text);
+
+                        Log.d("Mcho", "Set Reminder: " + date.toString());
                         break;
                     default:
                         syn_.SpeakToAudio("我不太理解你的意思");
