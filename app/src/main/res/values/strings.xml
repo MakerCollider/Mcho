@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Mcho</string>
     <string name="api_key">c639f41195844ccc8da6396737fcf671</string>
-    <string name="luis_app_key">044b29a0-a2b0-4d8e-b18c-c3b4b75b0439</string>
-    <string name="luis_api_key">044b29a0-a2b0-4d8e-b18c-c3b4b75b0439</string>
-    <string name="default_locale">en-us</string>
-    <string name="nick_name">Alexa</string>
+    <string name="luis_subscription_id">616b2b63792e4d309907befa27d0551f</string>
+    <string name="luis_app_id">c27c4af7-d44a-436f-a081-841bb834fa29</string>
+    <string name="default_locale">zh-cn</string>
+    <string name="nick_name">小黑</string>
 </resources>
