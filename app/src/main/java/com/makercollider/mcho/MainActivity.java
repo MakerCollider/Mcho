@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -12,6 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.microsoft.speech.tts.*;
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
     boolean response_trigger_ = false;
 
     WeatherAPI weather_api = new WeatherAPI();
+
+    private static TextView log_text_view_;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
 
             if(start_index != -1) {
                 question_text = raw_response.substring(start_index + nick_name_length_);
+                addLog("我", question_text);
                 response_trigger_ = true;
             }
 
@@ -137,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                 String value;
                 Calendar date = Calendar.getInstance();
 
+                String output_text = "";
+
                 Log.d("Mcho", "Intent Type: " + type);
                 switch (type) {
                     case "builtin.intent.weather.check_weather":
@@ -159,9 +168,9 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                             e.printStackTrace();
                         }
 
-                        syn_.SpeakToAudio(weather_api.location + "今天的天气是" + weather_api.weather +
-                                "，温度"+ weather_api.temperature + "摄氏度" +
-                                "，" + weather_api.wind_power + "级" + weather_api.wind_dir);
+                        output_text = String.format("%s现在的天气是%s，温度%s摄氏度，%s级%s。",
+                                weather_api.location, weather_api.weather, weather_api.temperature,
+                                weather_api.wind_power, weather_api.wind_dir);
                         break;
                     case "builtin.intent.calendar.check_availability":
                         if(entities.length() > 0) {
@@ -181,11 +190,10 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                                 }
                             }
                         }
-                        syn_.SpeakToAudio((date.get(Calendar.MONTH)+1) + "月，" +
-                                date.get(Calendar.DAY_OF_MONTH) + "日，" +
-                                date.get(Calendar.HOUR) + "点，" +
-                                "没有待办事情。");
 
+                        output_text = String.format("%d月，%d日，%d点，%s。",
+                                date.get(Calendar.MONTH)+1, date.get(Calendar.DAY_OF_MONTH),
+                                date.get(Calendar.HOUR), "没有待办事情");
                         Log.d("Mcho", "CheckDate: " + date.toString());
                         break;
                     case "builtin.intent.reminder.create_single_reminder":
@@ -212,19 +220,19 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                             }
                         }
 
-                        syn_.SpeakToAudio("好的，已为您建立事件。" +
-                                (date.get(Calendar.MONTH)+1) + "月，" +
-                                date.get(Calendar.DAY_OF_MONTH) + "日，" +
-                                date.get(Calendar.HOUR) + "点，" +
-                                reminder_text);
+                        output_text = String.format("好的，已为您建立事件。%d月，%d日，%d点，%s。",
+                                date.get(Calendar.MONTH)+1, date.get(Calendar.DAY_OF_MONTH),
+                                date.get(Calendar.HOUR), reminder_text);
 
                         Log.d("Mcho", "Set Reminder: " + date.toString());
                         break;
                     default:
-                        syn_.SpeakToAudio("我不太理解你的意思");
+                        output_text = "我不太理解你的意思。";
                         Log.d("Mcho", "Unknow Intent Type");
                 }
 
+                syn_.SpeakToAudio(output_text);
+                addLog(this.nick_name_, output_text);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -239,5 +247,21 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
 
     public void onAudioEvent(boolean var1) {
         Log.d("Mcho", "AudioEvent: " + var1);
+    }
+
+    public void addLog(String log_from, String log_string) {
+        log_text_view_ = new TextView(this.getApplicationContext());
+
+        log_text_view_.setLayoutParams(new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT));
+        log_text_view_.setTextColor(Color.BLACK);
+        // log_text_view_.setBackgroundColor(Color.LTGRAY);
+        log_text_view_.setAlpha((float) 0.4);
+
+        log_text_view_.setText(log_from + ": " + log_string);
+
+        LinearLayout log_layout = (LinearLayout)this.findViewById(R.id.log_linearlayout);
+        log_layout.addView(log_text_view_);
     }
 }

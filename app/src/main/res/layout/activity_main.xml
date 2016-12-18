@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -9,16 +9,32 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.makercollider.mcho.MainActivity"
-    android:background="?attr/actionModeSplitBackground">
+    android:background="?attr/actionModeSplitBackground"
+    android:weightSum="1"
+    android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button"
-        android:elevation="0dp"
-        android:background="?android:attr/fingerprintAuthDrawable"
-        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
-        android:layout_centerVertical="true"
+    <TextClock
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textClock"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:fontFamily="sans-serif"
+        android:typeface="sans"
+        android:textColor="@android:color/holo_blue_bright"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:backgroundTint="@android:color/background_light"
-        android:layout_width="100sp"
-        android:layout_height="100sp" />
-</RelativeLayout>
+        android:textSize="24sp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="10dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/log_linearlayout"
+        android:layout_weight="0.00"
+        android:layout_gravity="center_horizontal"></LinearLayout>
+
+</LinearLayout>
