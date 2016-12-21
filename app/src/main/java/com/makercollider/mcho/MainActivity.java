@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -49,7 +50,11 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
 
     WeatherAPI weather_api = new WeatherAPI();
 
+    private ImageView status_view_;
+
     private static TextView log_text_view_;
+
+    private AudioManager audio_manager_;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
                 this.getString(R.string.luis_subscription_id));
 
         this.sst_client_.startMicAndRecognition();
+
+        status_view_ = (ImageView)this.findViewById(R.id.status_view);
+        audio_manager_ = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -105,10 +113,26 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
 
     public void onPartialResponseReceived(String var1) {
         Log.d("Mcho", "SST Partial Response Receive");
+
+        // status_view_ = (ImageView)this.findViewById(R.id.status_view);
+        // audio_manager_ = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+        if(audio_manager_.isMusicActive()) {
+            status_view_.setImageResource(android.R.drawable.presence_busy);
+        } else {
+            status_view_.setImageResource(android.R.drawable.presence_online);
+        }
     }
 
     public void onFinalResponseReceived(final RecognitionResult response) {
         String raw_response="", question_text="";
+
+        // status_view_ = (ImageView)this.findViewById(R.id.status_view);
+        // audio_manager_ = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+        if(audio_manager_.isMusicActive()) {
+            status_view_.setImageResource(android.R.drawable.presence_busy);
+        } else {
+            status_view_.setImageResource(android.R.drawable.presence_online);
+        }
 
         this.sst_client_.endMicAndRecognition();
         if(response.RecognitionStatus == RecognitionStatus.RecognitionSuccess) {
@@ -134,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
 
     public void onIntentReceived(String var1) {
         Log.d("Mcho", "Intent Receive");
+
         if(response_trigger_ == true) {
             try {
                 JSONObject json_response = new JSONObject(var1);
@@ -238,6 +263,14 @@ public class MainActivity extends AppCompatActivity implements ISpeechRecognitio
             }
 
             response_trigger_ = false;
+
+            // status_view_ = (ImageView)this.findViewById(R.id.status_view);
+            // audio_manager_ = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+            if(audio_manager_.isMusicActive()) {
+                status_view_.setImageResource(android.R.drawable.presence_busy);
+            } else {
+                status_view_.setImageResource(android.R.drawable.presence_online);
+            }
         }
     }
 
